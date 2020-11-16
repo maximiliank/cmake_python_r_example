@@ -1,0 +1,30 @@
+cmake_minimum_required(VERSION 3.15)
+project(cmake_python_r_example)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+option(BUILD_RPACKAGE "Build RPackage bindings" ON)
+option(BUILD_PYPACKAGE "Build Python package bindings" ON)
+
+# version handling
+set(CppLIB_VERSION "0.0.1")
+add_subdirectory(src/CppLib)
+
+define_property(TARGET PROPERTY Package_Name
+        BRIEF_DOCS "The name of R/Python package to be installed"
+        FULL_DOCS "The name of R/Python package to be installed"
+        )
+
+enable_testing()
+if (BUILD_RPACKAGE)
+    add_subdirectory(src/RPackage)
+    add_subdirectory(tests/R)
+endif ()
+
+if (BUILD_PYPACKAGE)
+    add_subdirectory(src/Python)
+    add_subdirectory(tests/Python)
+endif ()
