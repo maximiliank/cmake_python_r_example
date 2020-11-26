@@ -15,7 +15,7 @@ create_file_if_not_existing("${CMAKE_CURRENT_BINARY_DIR}/NAMESPACE" "# Generated
 list(APPEND sources "${RCPP_EXPORTS_FILE}")
 
 add_library(${TARGET_NAME} SHARED ${sources})
-set_source_files_properties(${RCPP_EXPORTS_FILE} PROPERTIES COMPILE_FLAGS $<$<CXX_COMPILER_ID:GNU>:-Wno-old-style-casts>)
+set_source_files_properties(${RCPP_EXPORTS_FILE} PROPERTIES COMPILE_FLAGS $<$<CXX_COMPILER_ID:GNU>:-Wno-old-style-cast>)
 
 execute_process(COMMAND "${R_COMMAND}" --silent --slave -e "cat(R.Version()$platform)" OUTPUT_VARIABLE R_PLATFORM)
 if (WIN32)
