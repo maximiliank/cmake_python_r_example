@@ -63,10 +63,47 @@ You can even write unit tests to test the package (for `R` the `testthat` packag
 [`test_sample.py`](tests/Python/test_sample.py) or [`test_package.R`](tests/R/test_package.R).
 
 
+Requirements
+------------
+
+#### Python
+Next to a recent python installation you need to install `pybind11` and `wheel`. You can do this via `pip`:
+```shell script
+pip install pybind11
+pip install wheel
+```
+If installed as a user make sure you add your local `site-packages` folder to your (users environment) path. 
+You can get information for your required paths via:
+```shell script
+python -m site
+```
+#### R
+Additionally to `R` you need to install `Rcpp`, `roxygen2` and `testthat`.
+
+```
+install.packages(c("Rcpp", "roxygen2", "testthat"))
+```
+
+#### Windows Prerequisites for R C++ packages
+
+On Windows you will need `MinGW` in order to build the `R` bindings, you can download it 
+[here](https://nuwen.net/mingw.html). Further it is recommended to install [RTools](https://cran.r-project.org/bin/windows/Rtools/rtools40-x86_64.exe).
+After the installation you have to adjust/create the `.Renviron.x64` file in your `Documents` folder:
+```
+PATH="${RTOOLS40_HOME}\usr\bin;${PATH}"
+BINPREF=<path_to_mingw_root>/bin/
+```
+
+The `BINREF` setting is only required for using the internal `R` C++ package generation. But you have to make sure
+to have `make.exe` and `zip.exe` (both included in RTools) on your `PATH`.
+
 Example usage
 -------------
 
-Tested it with `g++` 10.2.0, `R` 4.0.2 and `Python` 3.8.6 on linux.
+Tested with the following configurations:
+* Linux: `g++` 10.2.0, `R` 4.0.2 and `Python` 3.8.6.
+* Windows (Python only): `MSVC` 19.28.29333.0 `Python` 3.7.8.
+* Windows (MinGW): `g++` 9.2.0, `R` 4.0.3 and `Python` 3.7.8.
 
 Create a `build` directory and run `CMake`:
 
@@ -74,6 +111,11 @@ Create a `build` directory and run `CMake`:
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
+```
+
+For Windows you have to select the `MinGW` generator in your `cmake` call, i.e.
+```shell script
+cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_FIND_ROOT_PATH=<path_to_mingw_root> ..
 ```
 
 Then you can create, install or test the package:
@@ -102,3 +144,4 @@ ctest
 If you only want to create only one of the packages you can add the following parameter to `CMake`:
 * only `python`: `-DBUILD_RPACKAGE=OFF`
 * only `R`: `-DBUILD_PYPACKAGE=OFF`
+
