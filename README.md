@@ -141,7 +141,7 @@ cmake --build . --target RTests
 ctest
 ```
 
-If you only want to create only one of the packages you can add the following parameter to `CMake`:
+If you want to create only one of the packages you can add the following parameter to `CMake`:
 * only `python`: `-DBUILD_RPACKAGE=OFF`
 * only `R`: `-DBUILD_PYPACKAGE=OFF`
 
