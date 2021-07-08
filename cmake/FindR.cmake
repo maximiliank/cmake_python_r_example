@@ -21,17 +21,24 @@ if (WIN32 AND NOT LIBR_HOME)
 	# print message if not found
 	if (NOT LIBR_HOME)
 		message(STATUS "Unable to locate R home (not written to registry)")
+	else ()
+		message(STATUS "Found LibR home ${LIBR_HOME}")
 	endif ()
 
 endif ()
-message(STATUS "Found LibR home ${LIBR_HOME}")
 find_program(R_COMMAND R DOC "R executable." HINTS "${LIBR_HOME}/bin/x64")
 
 if (NOT R_COMMAND)
-	message(STATUS "Unable to locate R executable")
+	message(FATAL_ERROR "Unable to locate R executable")
 else ()
 	message(STATUS "Found R: ${R_COMMAND}")
 endif ()
+
+execute_process(
+		COMMAND ${R_COMMAND} "--slave" "--no-save" "-e" "cat(Sys.getenv('R_HOME'))"
+		OUTPUT_VARIABLE R_HOME
+)
+message(STATUS "Found R_HOME ${R_HOME}")
 
 IF (MINGW)
 	SET(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
@@ -39,12 +46,12 @@ IF (MINGW)
 ENDIF (MINGW)
 
 find_path(R_INCLUDE_DIR "R.h"
-		PATHS ${R_ROOT_DIR} /usr/share/R /usr/include/R "${LIBR_HOME}"
+		PATHS ${R_ROOT_DIR} /usr/share/R /usr/include/R "${LIBR_HOME}" "${R_HOME}"
 		PATH_SUFFIXES include
 		NO_DEFAULT_PATH)
 
 find_library(R_LIBRARY NAMES "R"
-		PATHS ${R_ROOT_DIR} /usr/lib64/R /usr/lib/R "${LIBR_HOME}/bin"
+		PATHS ${R_ROOT_DIR} /usr/lib64/R /usr/lib/R "${LIBR_HOME}/bin" "${R_HOME}"
 		PATH_SUFFIXES lib lib64 x64
 		NO_DEFAULT_PATH)
 

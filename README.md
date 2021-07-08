@@ -15,18 +15,46 @@ The version number of the resulting package is set via the `CMake` variable `Cpp
 Python
 ------
 
-For creating the `Python` package `pybind11` is used together with `pip` to build or install the package. The binding 
+For creating the `Python` package `pybind11` is used together with `pip` to build or install the package. The binding
 code is placed in [`myclass_bindings.cpp`](src/Python/myclass_bindings.cpp).
 
 The files `setup.py` and `init.py` are created via `configure_file`.
 
+### Vector arguments via `std::span`
+
+With the `python` bindings it is easy to pass `numpy` vectors to functions taking `std::span` as parameters. Therefore
+you can write functions operating on columns of a dataframe quite easy. For example if you have a function with the
+following signature
+
+```c++
+std::vector<double> CppLib::vec_add(const std::span<const double> a, const std::span<const double> b)
+```
+
+you can bind it via a lambda as follows
+
+```c++
+m.def("vec_add", [](const pybind11::array_t<double>& a, const pybind11::array_t<double>& b) {
+                return wrap_function(&CppLib::vec_add, a, b);
+            }, "Adds two arrays of same length elementwise");
+```
+
+The function `wrap_function` forwards the `pybind11::array_t` to a `std::span` and calls the specified function. Notice
+that `const pybind11::array_t<double>&` will be forwarded as `std::span<const double>` and non const values or
+references will be forwarded as non const `std::span`, see `src/Python/src/conversions.hpp` for details. Similar, a
+`std::vector` return value will be moved to a numpy array.
+
+In case you want to operate on a whole `pandas` dataframe you can write an intermediate python function in the package
+which converts the desired columns to numpy arrays and calls the C++ implementation, see `src/Python/py/extensions.py`
+for examples.
+
 R
 -
 
-This setup uses `roxygen2` code documentation and `Rcpp` modules for package generation. Therefore
-write your binding code as in [`myclass_export.cpp`](src/RPackage/src/myclass_export.cpp).
+This setup uses `roxygen2` code documentation and `Rcpp` modules for package generation. Therefore write your binding
+code as in [`myclass_export.cpp`](src/RPackage/src/myclass_export.cpp).
 
 The `RPackageBuild` target then runs:
+
 * Rcpp::compileAttributes()
 * roxygen2::roxygenise(load_code=load_source)
 
@@ -94,8 +122,8 @@ PATH="${RTOOLS40_HOME}\usr\bin;${PATH}"
 BINPREF=<path_to_mingw_root>/bin/
 ```
 
-The `BINREF` setting is only required for using the internal `R` C++ package generation. But you have to make sure
-to have `make.exe` and `zip.exe` (both included in RTools) on your `PATH`.
+The `BINPREF` setting is only required for using the internal `R` C++ package generation. But you have to make sure to
+have `make.exe` and `zip.exe` (both included in RTools) on your `PATH`.
 
 Example usage
 -------------

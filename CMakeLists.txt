@@ -3,20 +3,26 @@ project(cmake_python_r_example)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if (MSVC)
     # warning level 4 and all warnings as errors
     add_compile_options(/W4 /WX)
-else()
+else ()
     # lots of warnings and all warnings as errors
     add_compile_options(-Wall -Wextra -Wold-style-cast -pedantic -Werror)
-endif()
+endif ()
 
 option(BUILD_RPACKAGE "Build RPackage bindings" ON)
 option(BUILD_PYPACKAGE "Build Python package bindings" ON)
+
+INCLUDE(CheckIncludeFileCXX)
+CHECK_INCLUDE_FILE_CXX(span HAS_SPAN)
+if (NOT HAS_SPAN)
+    message(FATAL_ERROR "Could not find span header, but it is required for the numpy bindings")
+endif ()
 
 # version handling
 set(CppLIB_VERSION "0.0.1")
